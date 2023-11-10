@@ -1,9 +1,10 @@
 #
 #
 
+import os
 import keyboard
 
-matriz_principal = matriz = [
+matriz = [
     ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
     ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
     ["0", "1", "2", "0", "0", "0", "1", "0", "1", "0", "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "1", "0", "1", "0", "2", "1", "1", "1", "1", "2", "0", "0", "0", "0"],
@@ -47,7 +48,77 @@ matriz_principal = matriz = [
 ]
 
 
+matriz_inicial = [fila.copy() for fila in matriz]
 
+
+
+posx = 0  #posicion en x del jugador e indices de la matriz
+posy = 0 #posicion en y del jugador e indices de la matriz
+
+
+
+#actualiza la matriz, cuando llega a los indices iguales a posx y pos
+#actualiza la posicion del jugador
+def actualizar_matriz():
+    for n in range(len(matriz)):
+        for x in range(len(matriz[0])):
+            if n == posy and x == posx:
+                matriz[n][x] = "👾"
+            elif matriz[n][x] == "👾":
+                matriz[n][x] = matriz_inicial[n][x]
+            else:
+                matriz[n][x] = f"{matriz[n][x]}"
+
+def imprimir_matriz():
+    actualizar_matriz()
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("-------------------------------------------------------------------------")
+    for fila in matriz:
+        for elemento in fila:
+            print(elemento, end="\t")
+        print()
+    print(f"posx:{posx}, posy: {posy}")
+    print("-------------------------------")
+
+#aumenta la posicion posx y verifica que no salga de la matriz
+def mover_derecha():
+    global posx
+    if posx + 1 < len(matriz[0]):
+        posx += 1
+#disminuye la posicion posx y verifica que no salga de la matriz
+def mover_izquierda():
+    global posx
+    if posx - 1 >= 0:
+        posx -= 1
+
+#aumenta la posicion posy y verifica que no salga de la matriz
+def mover_abajo():
+    global posy
+    if posy + 1 < len(matriz):
+        posy += 1
+
+#disminuye la posicion posy y verifica que no salga de la matriz
+def mover_arriba():
+    global posy
+    if posy - 1 >= 0:
+        posy -= 1
+
+#lista de teclas funcionales
+teclas = ['k', 'a', 's', 'd', 'w']
+
+for tecla in teclas:
+    if tecla == 'd': #verifica la tecla que se toco
+        keyboard.add_hotkey(tecla, mover_derecha)  #ejecuta la funcion segun la tecla
+    elif tecla == 's': #verifica la tecla que se toco
+        keyboard.add_hotkey(tecla, mover_abajo) #ejecuta la funcion segun la tecla
+    elif tecla == 'w': #verifica la tecla que se toco
+        keyboard.add_hotkey(tecla, mover_arriba) #ejecuta la funcion segun la tecla
+    elif tecla == 'a': #verifica la tecla que se toco
+        keyboard.add_hotkey(tecla, mover_izquierda) #ejecuta la funcion segun la tecla
+    else:
+        keyboard.add_hotkey(tecla, imprimir_matriz) #ejecuta la funcion segun la tecla
+
+keyboard.wait('esc') #para salir del bucle
 
 
 
