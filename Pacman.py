@@ -1,5 +1,5 @@
 # Fabiana
-#
+# Sebastian
 
 import keyboard
 # ________________________________________________________bibliotecas_________________________________________________________________
@@ -43,11 +43,11 @@ def menuDificultad():  # Funcion que crea la ventana "menuDificultad" donde sele
     titulo = Label(menuDif, text="Seleccione la dificultad:", fg="deep sky blue", bg="black", font=("Impact", 14))
     titulo.place(x=210, y=40)
     btnNivel1 = Button(menuDif, text="        Nivel 1        ", bg="deep sky blue", fg="black",
-                       command=0)  # boton que muestra la ventana "nivel_1"
+                       command=nivel1)  # boton que muestra la ventana "nivel_1"
     btnNivel1.place(x=150, y=140)
-    btnNivel1 = Button(menuDif, text="        Nivel 2        ", bg="deep sky blue", fg="black",
-                       command=0)  # boton que muestra la ventana "nivel_1"
-    btnNivel1.place(x=350, y=140)
+    btnNivel2 = Button(menuDif, text="        Nivel 2        ", bg="deep sky blue", fg="black",
+                       command=nivel2)  # boton que muestra la ventana "nivel_2"
+    btnNivel2.place(x=350, y=140)
     btnSalir = Button(menuDif, text="                   Salir                    ", bg="deep sky blue", fg="black",
                       command=menuDif.destroy)  # boton que realiza la opcion de salir
     btnSalir.place(x=430, y=250)
@@ -59,9 +59,23 @@ def menuDificultad():  # Funcion que crea la ventana "menuDificultad" donde sele
 #_______________________________________________NivelUno_________________________________________________________________
 
 
-# def nivel1():
+def nivel1():
+    niv1 = Toplevel(bg="Black")
+    niv1.minsize(800, 500)
+    niv1.resizable(width=NO, height=NO)
+    niv1.title("Nivel 1")
 
 
+
+
+#_______________________________________________NivelDos_________________________________________________________________
+
+
+def nivel2():
+    niv2 = Toplevel(bg="Black")
+    niv2.minsize(800, 500)
+    niv2.resizable(width=NO, height=NO)
+    niv2.title("Nivel 2")
 
 
 
