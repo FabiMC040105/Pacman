@@ -1,4 +1,4 @@
-#
+# Fabiana
 #
 
 import keyboard
@@ -59,7 +59,7 @@ def menuDificultad():  # Funcion que crea la ventana "menuDificultad" donde sele
 #_______________________________________________NivelUno_________________________________________________________________
 
 
-def nivel1():
+# def nivel1():
 
 
 
