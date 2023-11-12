@@ -14,6 +14,9 @@ from tkinter import simpledialog
 from tkinter import messagebox
 from tkinter import font
 import time
+from PIL import Image
+
+
 
 # _____________________________________________________pantallaPrincipal_________________________________________________________
 presentacion = Tk()  # Crea la ventana principal
@@ -66,40 +69,42 @@ class PacMan:
     def __init__(self, canvas, matriz):
         self.canvas = canvas
         self.matriz = matriz
+        self.posicion = (0, 0)
         self.filas = len(matriz)
         self.columnas = len(matriz[0])
         self.estado = "vivo"
         self.pos_x = 1
         self.pos_y = 1
         self.velocidad = 1
+        self.juego = None
 
-    def mover_derecha(self):
-        self.actualizar_posicion(self.pos_x, self.pos_y + 1)
+    def terminar_juego(self):
+        # Lógica para terminar el juego
+        print("Juego terminado")
+        if self.juego:
+            self.juego.terminar_juego()
 
-    def mover_izquierda(self):
-        self.actualizar_posicion(self.pos_x, self.pos_y - 1)
 
-    def mover_arriba(self):
-        self.actualizar_posicion(self.pos_x - 1, self.pos_y)
-
-    def mover_abajo(self):
-        self.actualizar_posicion(self.pos_x + 1, self.pos_y)
 
     def mover_izquierda(self):
-        if self.posy > 0:
-            self.posy -= 1
+        if self.pos_y > 0:
+            self.actualizar_posicion(self.pos_x, self.pos_y - 1)
 
     def mover_derecha(self):
-        if self.posy < 35:  # Ajustar según el tamaño real de tu tablero
-            self.posy += 1
+        if self.pos_y < self.columnas - 1:
+            self.actualizar_posicion(self.pos_x, self.pos_y + 1)
 
     def mover_arriba(self):
-        if self.posx > 0:
-            self.posx -= 1
+        if self.pos_x > 0:
+            self.actualizar_posicion(self.pos_x - 1, self.pos_y)
 
     def mover_abajo(self):
-        if self.posx < 39:  # Ajustar según el tamaño real de tu tablero
-            self.posx += 1
+        if self.pos_x < self.filas - 1:
+            self.actualizar_posicion(self.pos_x + 1, self.pos_y)
+
+    def obtener_posicion(self):
+        return self.posicion
+
 
     def actualizar_posicion(self, nueva_x, nueva_y):
         # Verificar si la nueva posición es válida
@@ -123,16 +128,16 @@ class PacMan:
                 self.dibujar_pacman()
 
     def comer_punto(self, x, y):
-        if tablero[x][y] == "1":
-            self.limpiar_posicion(x, y, tablero)
+        if self.matriz[x][y] == "1":
+            self.limpiar_posicion(x, y)
 
     def comer_capsula(self, x, y):
-        if tablero[x][y] == "2":
-            self.limpiar_posicion(x, y, tablero)
+        if self.matriz[x][y] == "2":
+            self.limpiar_posicion(x, y)
 
     def comer_alimento_comida(self, x, y):
-        if tablero[x][y] == "3":
-            self.limpiar_posicion(x, y, tablero)
+        if self.matriz[x][y] == "3":
+            self.limpiar_posicion(x, y)
 
     def limpiar_posicion(self, x, y):
         self.matriz[x][y] = "0"  # Limpiar la posición en la matriz
@@ -143,35 +148,76 @@ class PacMan:
         # Carga la imagen de PacMan
         imagen = Image.open("pacman.png")  # Reemplaza "pacman.png" con el nombre de tu imagen
         imagen = imagen.resize((20, 20), Image.ANTIALIAS)
-        imagen_pacman = ImageTk.PhotoImage(imagen)
+        imagen_pacman = Image.PhotoImage(imagen)
 
         return imagen_pacman
 
-    x = self.pacman.posx
-    y = self.pacman.posy
+    def dibujar_pacman(self):
+        # Calcula las coordenadas en píxeles del canvas
+        x_pixel = self.pos_y * 20
+        y_pixel = self.pos_x * 20
 
-    # Calcula las coordenadas en píxeles del canvas
-    x_pixel = y * 20
-    y_pixel = x * 20
+        # Carga la imagen de PacMan en el canvas
+        self.imagen_pacman = self.cargar_imagen_pacman()
+        self.canvas.create_image(x_pixel, y_pixel, anchor="nw", image=self.imagen_pacman, tags="pacman")
 
-    # Carga la imagen de PacMan en el canvas
-    self.imagen_pacman = self.cargar_imagen_pacman()
-    self.canvas.create_image(x_pixel, y_pixel, anchor="nw", image=self.imagen_pacman)
+
 
 
 class PacmanGame:
     def __init__(self, root, matriz):
         self.root = root
-        self.root.title("Pac-Man Game")
-        self.canvas = tk.Canvas(root, width=600, height=600, bg="black")
-        self.canvas.pack()
+        self.numero_juego = 0
         self.matriz = matriz
+        self.canvas = tk.Canvas(root, width=800, height=600)
+        self.canvas.pack()
         self.pacman = PacMan(self.canvas, self.matriz)
+        self.inicializar_tablero()
+
+    def inicializar_tablero(self):
+        self.canvas.delete("all")  # Limpiar el tablero antes de la inicialización
+
+        for fila in range(len(self.matriz)):
+            for columna in range(len(self.matriz[0])):
+                valor = self.matriz[fila][columna]
+                x1, y1 = columna * 30, fila * 30
+                x2, y2 = x1 + 30, y1 + 30
+
+                # Dibujar el contenido del tablero según el valor en la matriz
+                if valor == "0":
+                    color = "black"  # Espacio vacío
+                elif valor == "1":
+                    color = "blue"  # Pared
+                elif valor == "2":
+                    color = "white"  # Punto
+                    self.canvas.create_oval(x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill=color)
+                else:
+                    color = "yellow"  # Otros valores (por ejemplo, Pac-Man)
+
+                self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+
+    def dibujar_tablero(self):
+        self.canvas.delete("pacman")  # Elimina cualquier representación anterior de Pac-Man
+
+        # Obtiene la posición actual de Pac-Man y dibuja una representación visual
+        pacman_posicion = self.pacman.obtener_posicion()
+        x, y = pacman_posicion
+        x1, y1 = x * 15, y * 15
+        x2, y2 = x1 + 15, y1 + 15
+
+        self.canvas.create_oval(x1, y1, x2, y2, fill="yellow", tags="pacman")
+
+    def terminar_juego(self):
+        # Lógica para terminar el juego
+        print("Juego terminado")
+        self.root.destroy()
+
 
     def iniciar_juego(self):
         self.numero_juego += 1
         self.inicializar_tablero()
         self.dibujar_tablero()
+        self.pacman.juego = self
 
         keyboard.add_hotkey('d', self.pacman.mover_derecha)
         keyboard.add_hotkey('a', self.pacman.mover_izquierda)
@@ -181,7 +227,8 @@ class PacmanGame:
 
         keyboard.wait()
 
-if __name__ == "__main__":
+if __name__ == "__Pacman__":
+    root = Tk()
     matriz = [
         ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
@@ -225,10 +272,9 @@ if __name__ == "__main__":
         ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0","0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
     ]
 
-    root = tk.Tk()
-    pacman_game = PacmanGame(root, matriz)
-    pacman_game.iniciar_juego()
-    root.mainloop()
+    pacman_game = PacmanGame(root, matriz)  # Solo pasa la matriz como argumento
+
+
 
 
 
