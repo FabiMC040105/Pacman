@@ -47,7 +47,7 @@ def menuDificultad():  # Funcion que crea la ventana "menuDificultad" donde sele
     titulo = Label(menuDif, text="Seleccione la dificultad:", fg="deep sky blue", bg="black", font=("Impact", 14))
     titulo.place(x=210, y=40)
     btnNivel1 = Button(menuDif, text="        Nivel 1        ", bg="deep sky blue", fg="black",
-                       command= PacmanGame)  # boton que muestra la ventana "nivel_1"
+                       command= 0)  # boton que muestra la ventana "nivel_1"
     btnNivel1.place(x=150, y=140)
     btnNivel2 = Button(menuDif, text="        Nivel 2        ", bg="deep sky blue", fg="black",
                        command=0)  # boton que muestra la ventana "nivel_2"
@@ -64,218 +64,220 @@ def menuDificultad():  # Funcion que crea la ventana "menuDificultad" donde sele
 
 #_______________________________________________Juego_________________________________________________________________
 
-
-class PacMan:
-    def __init__(self, canvas, matriz):
-        self.canvas = canvas
-        self.matriz = matriz
-        self.posicion = (0, 0)
-        self.filas = len(matriz)
-        self.columnas = len(matriz[0])
-        self.estado = "vivo"
-        self.pos_x = 1
-        self.pos_y = 1
-        self.velocidad = 1
-        self.juego = None
-
-    def terminar_juego(self):
-        # Lógica para terminar el juego
-        print("Juego terminado")
-        if self.juego:
-            self.juego.terminar_juego()
-
-
-
-    def mover_izquierda(self):
-        if self.pos_y > 0:
-            self.actualizar_posicion(self.pos_x, self.pos_y - 1)
-
-    def mover_derecha(self):
-        if self.pos_y < self.columnas - 1:
-            self.actualizar_posicion(self.pos_x, self.pos_y + 1)
-
-    def mover_arriba(self):
-        if self.pos_x > 0:
-            self.actualizar_posicion(self.pos_x - 1, self.pos_y)
-
-    def mover_abajo(self):
-        if self.pos_x < self.filas - 1:
-            self.actualizar_posicion(self.pos_x + 1, self.pos_y)
-
-    def obtener_posicion(self):
-        return self.posicion
-
-
-    def actualizar_posicion(self, nueva_x, nueva_y):
-        # Verificar si la nueva posición es válida
-        if 0 <= nueva_x < self.filas and 0 <= nueva_y < self.columnas:
-            contenido_nueva_posicion = self.matriz[nueva_x][nueva_y]
-
-            if contenido_nueva_posicion == "1":  # Alimento (punto)
-                self.comer_punto(nueva_x, nueva_y)
-            elif contenido_nueva_posicion == "2":  # Cápsula
-                self.comer_capsula(nueva_x, nueva_y)
-            elif contenido_nueva_posicion == "3":  # Alimento comida
-                self.comer_alimento_comida(nueva_x, nueva_y)
-            elif contenido_nueva_posicion == "0":  # Pared
-                # No se puede mover a una pared
-                pass
-            else:
-                # Mover a una posición vacía
-                self.limpiar_posicion(self.pos_x, self.pos_y)
-                self.pos_x = nueva_x
-                self.pos_y = nueva_y
-                self.dibujar_pacman()
-
-    def comer_punto(self, x, y):
-        if self.matriz[x][y] == "1":
-            self.limpiar_posicion(x, y)
-
-    def comer_capsula(self, x, y):
-        if self.matriz[x][y] == "2":
-            self.limpiar_posicion(x, y)
-
-    def comer_alimento_comida(self, x, y):
-        if self.matriz[x][y] == "3":
-            self.limpiar_posicion(x, y)
-
-    def limpiar_posicion(self, x, y):
-        self.matriz[x][y] = "0"  # Limpiar la posición en la matriz
-        self.canvas.delete("pacman")  # Limpiar el dibujo de PacMan
-        self.dibujar_pacman()  # Volver a dibujar PacMan en la nueva posición
-
-    def cargar_imagen_pacman(self):
-        # Carga la imagen de PacMan
-        imagen = Image.open("pacman.png")  # Reemplaza "pacman.png" con el nombre de tu imagen
-        imagen = imagen.resize((20, 20), Image.ANTIALIAS)
-        imagen_pacman = Image.PhotoImage(imagen)
-
-        return imagen_pacman
-
-    def dibujar_pacman(self):
-        # Calcula las coordenadas en píxeles del canvas
-        x_pixel = self.pos_y * 20
-        y_pixel = self.pos_x * 20
-
-        # Carga la imagen de PacMan en el canvas
-        self.imagen_pacman = self.cargar_imagen_pacman()
-        self.canvas.create_image(x_pixel, y_pixel, anchor="nw", image=self.imagen_pacman, tags="pacman")
-
-
-
-
-class PacmanGame:
-    def __init__(self, root, matriz):
-        self.root = root
-        self.numero_juego = 0
-        self.matriz = matriz
-        self.canvas = tk.Canvas(root, width=800, height=600)
-        self.canvas.pack()
-        self.pacman = PacMan(self.canvas, self.matriz)
-        self.inicializar_tablero()
-
-    def inicializar_tablero(self):
-        self.canvas.delete("all")  # Limpiar el tablero antes de la inicialización
-
-        for fila in range(len(self.matriz)):
-            for columna in range(len(self.matriz[0])):
-                valor = self.matriz[fila][columna]
-                x1, y1 = columna * 30, fila * 30
-                x2, y2 = x1 + 30, y1 + 30
-
-                # Dibujar el contenido del tablero según el valor en la matriz
-                if valor == "0":
-                    color = "black"  # Espacio vacío
-                elif valor == "1":
-                    color = "blue"  # Pared
-                elif valor == "2":
-                    color = "white"  # Punto
-                    self.canvas.create_oval(x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill=color)
-                else:
-                    color = "yellow"  # Otros valores (por ejemplo, Pac-Man)
-
-                self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
-
-    def dibujar_tablero(self):
-        self.canvas.delete("pacman")  # Elimina cualquier representación anterior de Pac-Man
-
-        # Obtiene la posición actual de Pac-Man y dibuja una representación visual
-        pacman_posicion = self.pacman.obtener_posicion()
-        x, y = pacman_posicion
-        x1, y1 = x * 15, y * 15
-        x2, y2 = x1 + 15, y1 + 15
-
-        self.canvas.create_oval(x1, y1, x2, y2, fill="yellow", tags="pacman")
-
-    def terminar_juego(self):
-        # Lógica para terminar el juego
-        print("Juego terminado")
-        self.root.destroy()
-
-
-    def iniciar_juego(self):
-        self.numero_juego += 1
-        self.inicializar_tablero()
-        self.dibujar_tablero()
-        self.pacman.juego = self
-
-        keyboard.add_hotkey('d', self.pacman.mover_derecha)
-        keyboard.add_hotkey('a', self.pacman.mover_izquierda)
-        keyboard.add_hotkey('s', self.pacman.mover_abajo)
-        keyboard.add_hotkey('w', self.pacman.mover_arriba)
-        keyboard.add_hotkey('esc', self.terminar_juego)
-
-        keyboard.wait()
-
-if __name__ == "__Pacman__":
-    root = Tk()
-    matriz = [
-        ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "2", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "1", "2", "1", "1", "1", "0"],
-        ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
-        ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
-        ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
-        ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "1", "1", "0", "1", "1", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "3", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "1","1", "1", "1", "3", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
-        ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0","0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
-    ]
-
-    pacman_game = PacmanGame(root, matriz)  # Solo pasa la matriz como argumento
+#
+# class PacMan:
+#     def __init__(self, canvas, matriz):
+#         self.canvas = canvas
+#         self.matriz = matriz
+#         self.posicion = (0, 0)
+#         self.filas = len(matriz)
+#         self.columnas = len(matriz[0])
+#         self.estado = "vivo"
+#         self.pos_x = 1
+#         self.pos_y = 1
+#         self.velocidad = 1
+#         self.juego = None
+#
+#     def terminar_juego(self):
+#         # Lógica para terminar el juego
+#         print("Juego terminado")
+#         if self.juego:
+#             self.juego.terminar_juego()
+#
+#
+#
+#     def mover_izquierda(self):
+#         if self.pos_y > 0:
+#             self.actualizar_posicion(self.pos_x, self.pos_y - 1)
+#
+#     def mover_derecha(self):
+#         if self.pos_y < self.columnas - 1:
+#             self.actualizar_posicion(self.pos_x, self.pos_y + 1)
+#
+#     def mover_arriba(self):
+#         if self.pos_x > 0:
+#             self.actualizar_posicion(self.pos_x - 1, self.pos_y)
+#
+#     def mover_abajo(self):
+#         if self.pos_x < self.filas - 1:
+#             self.actualizar_posicion(self.pos_x + 1, self.pos_y)
+#
+#     def obtener_posicion(self):
+#         return self.posicion
+#
+#
+#     def actualizar_posicion(self, nueva_x, nueva_y):
+#         # Verificar si la nueva posición es válida
+#         if 0 <= nueva_x < self.filas and 0 <= nueva_y < self.columnas:
+#             contenido_nueva_posicion = self.matriz[nueva_x][nueva_y]
+#
+#             if contenido_nueva_posicion == "1":  # Alimento (punto)
+#                 self.comer_punto(nueva_x, nueva_y)
+#             elif contenido_nueva_posicion == "2":  # Cápsula
+#                 self.comer_capsula(nueva_x, nueva_y)
+#             elif contenido_nueva_posicion == "3":  # Alimento comida
+#                 self.comer_alimento_comida(nueva_x, nueva_y)
+#             elif contenido_nueva_posicion == "0":  # Pared
+#                 # No se puede mover a una pared
+#                 pass
+#             else:
+#                 # Mover a una posición vacía
+#                 self.limpiar_posicion(self.pos_x, self.pos_y)
+#                 self.pos_x = nueva_x
+#                 self.pos_y = nueva_y
+#                 self.dibujar_pacman()
+#
+#     def comer_punto(self, x, y):
+#         if self.matriz[x][y] == "1":
+#             self.limpiar_posicion(x, y)
+#
+#     def comer_capsula(self, x, y):
+#         if self.matriz[x][y] == "2":
+#             self.limpiar_posicion(x, y)
+#
+#     def comer_alimento_comida(self, x, y):
+#         if self.matriz[x][y] == "3":
+#             self.limpiar_posicion(x, y)
+#
+#     def limpiar_posicion(self, x, y):
+#         self.matriz[x][y] = "0"  # Limpiar la posición en la matriz
+#         self.canvas.delete("pacman")  # Limpiar el dibujo de PacMan
+#         self.dibujar_pacman()  # Volver a dibujar PacMan en la nueva posición
+#
+#     def cargar_imagen_pacman(self):
+#         # Carga la imagen de PacMan
+#         imagen = Image.open("pacman.png")  # Reemplaza "pacman.png" con el nombre de tu imagen
+#         imagen = imagen.resize((20, 20), Image.ANTIALIAS)
+#         imagen_pacman = Image.PhotoImage(imagen)
+#
+#         return imagen_pacman
+#
+#     def dibujar_pacman(self):
+#         # Calcula las coordenadas en píxeles del canvas
+#         x_pixel = self.pos_y * 20
+#         y_pixel = self.pos_x * 20
+#
+#         # Carga la imagen de PacMan en el canvas
+#         self.imagen_pacman = self.cargar_imagen_pacman()
+#         self.canvas.create_image(x_pixel, y_pixel, anchor="nw", image=self.imagen_pacman, tags="pacman")
+#
+#
+#
+#
+# class PacmanGame:
+#     def __init__(self, root, matriz):
+#         self.root = root
+#         self.numero_juego = 0
+#         self.matriz = matriz
+#         self.canvas = tk.Canvas(root, width=800, height=600)
+#         self.canvas.pack()
+#         self.pacman = PacMan(self.canvas, self.matriz)
+#         self.inicializar_tablero()
+#
+#     def inicializar_tablero(self):
+#         self.canvas.delete("all")  # Limpiar el tablero antes de la inicialización
+#
+#         for fila in range(len(self.matriz)):
+#             for columna in range(len(self.matriz[0])):
+#                 valor = self.matriz[fila][columna]
+#                 x1, y1 = columna * 30, fila * 30
+#                 x2, y2 = x1 + 30, y1 + 30
+#
+#                 # Dibujar el contenido del tablero según el valor en la matriz
+#                 if valor == "0":
+#                     color = "black"  # Espacio vacío
+#                 elif valor == "1":
+#                     color = "blue"  # Pared
+#                 elif valor == "2":
+#                     color = "white"  # Punto
+#                     self.canvas.create_oval(x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill=color)
+#                 else:
+#                     color = "yellow"  # Otros valores (por ejemplo, Pac-Man)
+#
+#                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+#
+#     def dibujar_tablero(self):
+#         self.canvas.delete("pacman")  # Elimina cualquier representación anterior de Pac-Man
+#
+#         # Obtiene la posición actual de Pac-Man y dibuja una representación visual
+#         pacman_posicion = self.pacman.obtener_posicion()
+#         x, y = pacman_posicion
+#         x1, y1 = x * 15, y * 15
+#         x2, y2 = x1 + 15, y1 + 15
+#
+#         self.canvas.create_oval(x1, y1, x2, y2, fill="yellow", tags="pacman")
+#
+#     def terminar_juego(self):
+#         # Lógica para terminar el juego
+#         print("Juego terminado")
+#         self.root.destroy()
+#
+#
+#     def iniciar_juego(self):
+#         self.numero_juego += 1
+#         self.inicializar_tablero()
+#         self.dibujar_tablero()
+#         self.pacman.juego = self
+#
+#         keyboard.add_hotkey('d', self.pacman.mover_derecha)
+#         keyboard.add_hotkey('a', self.pacman.mover_izquierda)
+#         keyboard.add_hotkey('s', self.pacman.mover_abajo)
+#         keyboard.add_hotkey('w', self.pacman.mover_arriba)
+#         keyboard.add_hotkey('esc', self.terminar_juego)
+#
+#         keyboard.wait()
+#
+# if __name__ == "__Pacman__":
+#     root = Tk()
+#     matriz = [
+#         ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "2", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "1", "2", "1", "1", "1", "0"],
+#         ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
+#         ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
+#         ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
+#         ["0", "1", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0", "0", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "0", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "0", "1", "0", "0", "0", "0", "1", "1", "0", "1", "1", "0", "0", "0", "0", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0"],
+#         ["1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "1", "1", "1", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1"],
+#         ["0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1"],
+#         ["0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "2", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "0", "0", "0", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "1", "0", "1", "0", "0", "0", "0", "0", "1", "1", "1", "1", "0", "0", "0", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "0", "1", "1", "0", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0","0", "1", "1", "1", "1", "0", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "0", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "1", "1", "1", "0", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "0", "0", "0", "0", "0", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "1", "1", "1", "0", "1", "1", "1", "0", "0", "0", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "1", "0", "0", "0", "0", "0", "0", "0", "0","0", "1", "0", "0", "0", "0", "0", "0", "0", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "0", "1", "0", "0", "0", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0","0", "1", "0", "0", "0", "0", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "0", "1", "1", "1", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "0", "1", "1", "1", "1", "0", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "0", "0", "0", "0", "1", "1", "1", "1", "0", "1", "1", "0", "0", "0", "0", "0", "0", "0", "0", "0","0", "1", "0", "1", "1", "1", "1", "0", "0", "0", "0", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0", "1", "1", "1","1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "1", "0"],
+#         ["0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0","0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0", "0"],
+#     ]
 
 
 
+#     pacman_game = PacmanGame(root, matriz)  # Solo pasa la matriz como argumento
+#
+#
+#
 
 
 # _________________________________________________infoComplementaria_____________________________________________________
@@ -452,6 +454,9 @@ btnSalir = Button(presentacion, text=" X ", bg="red", font=("Arial", 12), fg="bl
 btnSalir.place(x=853.5, y=22)
 btnSonido = Button(presentacion, text="🔉", bg="gray", fg="black", font=("Arial", 12), command=toggle_musica)
 btnSonido.place(x=853.6, y=53.8)
+
+
+
 presentacion.mainloop()  # cierro la ventana
 
 
